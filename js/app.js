@@ -514,6 +514,136 @@ function beforeAfter(){
 }
 
 // ==============================================
+// PRODUCTS SHOP
+// ==============================================
+function productsShop() {
+  return {
+    activeCategory: 'all',
+    cart: [],
+    
+    categories: [
+      { id: 'all', name: 'الكل' },
+      { id: 'neon', name: '🔴 نيون' },
+      { id: 'canvas', name: '🖼️ كانفس' },
+      { id: 'stands', name: '📦 ستاندات' },
+      { id: 'gifts', name: '🎁 هدايا' },
+      { id: 'stickers', name: '🏷️ ملصقات' },
+      { id: 'printing', name: '👕 طباعة' },
+      { id: 'cards', name: '📇 كروت' },
+    ],
+
+    products: [
+      // نيون
+      { id: 1, name: 'لوحة نيون مخصصة - صغيرة', description: 'لوحة نيون LED بتصميمك الخاص، مثالية للمكاتب والغرف. مقاس 30×20 سم.', price: 350, category: 'neon', categoryName: 'نيون', emoji: '💡' },
+      { id: 2, name: 'لوحة نيون مخصصة - كبيرة', description: 'لوحة نيون LED احترافية للمحلات والمطاعم. مقاس 60×40 سم.', price: 750, category: 'neon', categoryName: 'نيون', emoji: '✨' },
+      
+      // كانفس
+      { id: 3, name: 'لوحة كانفس - مقاس وسط', description: 'طباعة عالية الجودة على قماش كانفس مشدود. مقاس 40×60 سم.', price: 180, category: 'canvas', categoryName: 'كانفس', emoji: '🎨' },
+      { id: 4, name: 'لوحة كانفس - مقاس كبير', description: 'لوحة كانفس فاخرة بإطار خشبي. مقاس 60×90 سم.', price: 320, category: 'canvas', categoryName: 'كانفس', emoji: '🖼️' },
+      
+      // ستاندات
+      { id: 5, name: 'ستاند رول أب', description: 'ستاند عرض قابل للطي مع طباعة عالية الدقة. مقاس 80×200 سم.', price: 280, category: 'stands', categoryName: 'ستاندات', emoji: '🎪' },
+      { id: 6, name: 'ستاند X-Banner', description: 'ستاند خفيف وسهل التركيب للمعارض. مقاس 60×160 سم.', price: 150, category: 'stands', categoryName: 'ستاندات', emoji: '📐' },
+      
+      // هدايا دعائية
+      { id: 7, name: 'أقلام دعائية (50 قلم)', description: 'أقلام جافة بطباعة الشعار. حد أدنى 50 قطعة.', price: 125, category: 'gifts', categoryName: 'هدايا', emoji: '🖊️' },
+      { id: 8, name: 'ميداليات مفاتيح (30 قطعة)', description: 'ميداليات معدنية بتصميم مخصص. حد أدنى 30 قطعة.', price: 180, category: 'gifts', categoryName: 'هدايا', emoji: '🔑' },
+      { id: 9, name: 'أكواب سيراميك (20 كوب)', description: 'أكواب بطباعة حرارية عالية الجودة. حد أدنى 20 قطعة.', price: 240, category: 'gifts', categoryName: 'هدايا', emoji: '☕' },
+      
+      // ملصقات
+      { id: 10, name: 'ملصقات فينيل (100 قطعة)', description: 'ملصقات مقاومة للماء بتصميمك. مقاس حتى 10×10 سم.', price: 95, category: 'stickers', categoryName: 'ملصقات', emoji: '🏷️' },
+      { id: 11, name: 'ستيكرات شفافة (100 قطعة)', description: 'ملصقات شفافة للتغليف والمنتجات.', price: 120, category: 'stickers', categoryName: 'ملصقات', emoji: '✴️' },
+      
+      // طباعة على الملابس
+      { id: 12, name: 'تيشيرت مطبوع', description: 'تيشيرت قطن 100% بطباعة DTF عالية الجودة.', price: 75, category: 'printing', categoryName: 'طباعة', emoji: '👕' },
+      { id: 13, name: 'هودي مطبوع', description: 'هودي فليس بطباعة أمامية أو خلفية.', price: 145, category: 'printing', categoryName: 'طباعة', emoji: '🧥' },
+      
+      // كروت شخصية
+      { id: 14, name: 'كروت شخصية (100 كرت)', description: 'كروت بزنس فاخرة، ورق 350 جرام مع تشطيب مات أو لامع.', price: 85, category: 'cards', categoryName: 'كروت', emoji: '📇' },
+      { id: 15, name: 'كروت شخصية فاخرة (100 كرت)', description: 'كروت مع طباعة ذهبية أو فضية وقص ليزر.', price: 180, category: 'cards', categoryName: 'كروت', emoji: '💳' },
+    ],
+
+    get filteredProducts() {
+      if (this.activeCategory === 'all') {
+        return this.products;
+      }
+      return this.products.filter(p => p.category === this.activeCategory);
+    },
+
+    get cartTotal() {
+      return this.cart.reduce((sum, item) => sum + item.price, 0);
+    },
+
+    filterByCategory(categoryId) {
+      this.activeCategory = categoryId;
+      // Analytics
+      trackAnalytics('products_filtered', { category: categoryId });
+    },
+
+    isInCart(productId) {
+      return this.cart.some(item => item.id === productId);
+    },
+
+    addToCart(product) {
+      if (!this.isInCart(product.id)) {
+        this.cart.push({ ...product });
+        // Analytics
+        trackAnalytics('product_added_to_cart', { 
+          productId: product.id, 
+          productName: product.name,
+          price: product.price 
+        });
+      }
+    },
+
+    removeFromCart(productId) {
+      this.cart = this.cart.filter(item => item.id !== productId);
+      // Analytics
+      trackAnalytics('product_removed_from_cart', { productId });
+    },
+
+    clearCart() {
+      this.cart = [];
+      trackAnalytics('cart_cleared');
+    },
+
+    checkout() {
+      if (this.cart.length === 0) return;
+
+      // Build WhatsApp message
+      const lines = [
+        `🛒 *طلب جديد من ${SITE_CONFIG.brand.name}*`,
+        '─────────────────',
+        '*المنتجات:*',
+        ...this.cart.map((item, i) => `${i + 1}. ${item.emoji} ${item.name} — ${item.price} ر.س`),
+        '─────────────────',
+        `*الإجمالي: ${this.cartTotal} ر.س*`,
+        '',
+        '📝 *بيانات العميل:*',
+        'الاسم: ',
+        'رقم الجوال: ',
+        'المدينة: ',
+        '',
+        '💬 ملاحظات إضافية: ',
+      ];
+
+      const message = encodeURIComponent(lines.join('\n'));
+      const whatsappUrl = `https://wa.me/${SITE_CONFIG.whatsapp}?text=${message}`;
+
+      // Analytics
+      trackAnalytics('checkout_initiated', {
+        itemCount: this.cart.length,
+        total: this.cartTotal,
+        items: this.cart.map(i => i.name)
+      });
+
+      // Open WhatsApp
+      window.open(whatsappUrl, '_blank');
+    }
+  };
+}
+
+// ==============================================
 // INITIALIZATION
 // ==============================================
 document.addEventListener('DOMContentLoaded', () => {
@@ -525,6 +655,7 @@ document.addEventListener('DOMContentLoaded', () => {
     window.briefWizard = briefWizard;
     window.workGallery = workGallery;
     window.beforeAfter = beforeAfter;
+    window.productsShop = productsShop;
   } catch (e) {
     console.error('[BOOT ERROR]', e);
   }

@@ -80,6 +80,7 @@
         <!-- Desktop Nav -->
         <nav class="hidden md:flex items-center gap-6 text-sm text-[color:var(--muted)]">
           <a class="hover:text-[color:var(--fg)] transition" href="#services">الخدمات</a>
+          <a class="hover:text-[color:var(--fg)] transition" href="#products">المنتجات</a>
           <a class="hover:text-[color:var(--fg)] transition" href="#work">الأعمال</a>
           <a class="hover:text-[color:var(--fg)] transition" href="#brief">البرف</a>
           <a class="hover:text-[color:var(--fg)] transition" href="#about">عن الصافي</a>
@@ -157,6 +158,7 @@
 
           <nav class="p-4 space-y-2 text-[color:var(--muted)]">
             <a class="block rounded-2xl px-4 py-3 bg-[color:var(--card)]/70 ring-1 ring-[color:var(--border)] hover:bg-[color:var(--card)]/90 hover:text-[color:var(--fg)] transition" href="#services" @click="mobileOpen=false">الخدمات</a>
+            <a class="block rounded-2xl px-4 py-3 bg-[color:var(--card)]/70 ring-1 ring-[color:var(--border)] hover:bg-[color:var(--card)]/90 hover:text-[color:var(--fg)] transition" href="#products" @click="mobileOpen=false">المنتجات</a>
             <a class="block rounded-2xl px-4 py-3 bg-[color:var(--card)]/70 ring-1 ring-[color:var(--border)] hover:bg-[color:var(--card)]/90 hover:text-[color:var(--fg)] transition" href="#work" @click="mobileOpen=false">الأعمال</a>
             <a class="block rounded-2xl px-4 py-3 bg-[color:var(--card)]/70 ring-1 ring-[color:var(--border)] hover:bg-[color:var(--card)]/90 hover:text-[color:var(--fg)] transition" href="#brief" @click="mobileOpen=false">البرف</a>
             <a class="block rounded-2xl px-4 py-3 bg-[color:var(--card)]/70 ring-1 ring-[color:var(--border)] hover:bg-[color:var(--card)]/90 hover:text-[color:var(--fg)] transition" href="#about" @click="mobileOpen=false">عن الصافي</a>
@@ -415,6 +417,145 @@
             افتح Brief Wizard
           </a>
         </article>
+      </div>
+    </section>
+
+    <!-- Products Section -->
+    <section id="products" class="py-10 sm:py-14">
+      <div data-reveal>
+        <h2 class="text-2xl sm:text-3xl font-black tracking-tight">منتجاتنا</h2>
+        <p class="mt-2 text-[color:var(--muted)]">تصاميم تُلمس — منتجات تُبهر. اختر منتجك وأضفه للسلة.</p>
+      </div>
+
+      <div class="mt-8" x-data="productsShop()">
+        <!-- Filter Tabs -->
+        <div class="flex flex-wrap gap-2 mb-8" data-reveal>
+          <template x-for="cat in categories" :key="cat.id">
+            <button
+              type="button"
+              class="px-4 py-2 text-sm font-bold rounded-2xl transition-all duration-300"
+              :class="activeCategory === cat.id 
+                ? 'bg-gradient-to-l from-fikra-violet to-fikra-orange text-white shadow-glow-orange' 
+                : 'bg-white/5 ring-1 ring-white/10 hover:ring-white/20 text-[color:var(--muted)] hover:text-[color:var(--fg)]'"
+              @click="filterByCategory(cat.id)"
+              x-text="cat.name"
+            ></button>
+          </template>
+        </div>
+
+        <!-- Products Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <template x-for="product in filteredProducts" :key="product.id">
+            <article
+              class="product-card group noise rounded-3xl border border-[color:var(--border)] bg-[color:var(--card)] backdrop-blur-md shadow-glass overflow-hidden transition-all duration-500"
+              data-reveal
+              x-data="{ tiltX: 0, tiltY: 0 }"
+              @mouseenter="$el.classList.add('is-hovering')"
+              @mousemove="tiltX = ($event.offsetX - $el.offsetWidth/2) / 15; tiltY = ($event.offsetY - $el.offsetHeight/2) / -15"
+              @mouseleave="tiltX = 0; tiltY = 0; $el.classList.remove('is-hovering')"
+              :style="`transform: perspective(1000px) rotateY(${tiltX}deg) rotateX(${tiltY}deg)`"
+            >
+              <!-- Product Image -->
+              <div class="relative h-48 overflow-hidden bg-gradient-to-br from-white/5 to-white/10">
+                <div
+                  class="absolute inset-0 flex items-center justify-center text-6xl transition-transform duration-500 group-hover:scale-110"
+                  x-text="product.emoji"
+                ></div>
+                <!-- Glow overlay on hover -->
+                <div class="absolute inset-0 bg-gradient-to-t from-fikra-orange/20 via-transparent to-fikra-violet/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                <!-- Category badge -->
+                <span class="absolute top-3 right-3 px-3 py-1 text-xs font-bold rounded-full bg-black/40 backdrop-blur-sm text-white" x-text="product.categoryName"></span>
+              </div>
+
+              <!-- Product Info -->
+              <div class="p-5">
+                <h3 class="font-extrabold text-lg" x-text="product.name"></h3>
+                <p class="mt-1 text-sm text-[color:var(--muted)] line-clamp-2" x-text="product.description"></p>
+                
+                <!-- Price & Add to Cart -->
+                <div class="mt-4 flex items-center justify-between gap-3">
+                  <div class="text-xl font-black">
+                    <span x-text="product.price"></span>
+                    <span class="text-sm font-normal text-[color:var(--muted)]">ر.س</span>
+                  </div>
+                  <button
+                    type="button"
+                    class="add-to-cart-btn relative inline-flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-2xl overflow-hidden transition-all duration-300 hover:scale-105 active:scale-95"
+                    :class="isInCart(product.id) 
+                      ? 'bg-green-500/20 text-green-400 ring-1 ring-green-500/30' 
+                      : 'bg-gradient-to-l from-fikra-violet to-fikra-orange text-white shadow-glow-orange'"
+                    @click="addToCart(product)"
+                  >
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path x-show="!isInCart(product.id)" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                      <path x-show="isInCart(product.id)" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                    <span x-text="isInCart(product.id) ? 'تمت الإضافة ✓' : 'أضف للسلة'"></span>
+                  </button>
+                </div>
+              </div>
+            </article>
+          </template>
+        </div>
+
+        <!-- Empty State -->
+        <div x-show="filteredProducts.length === 0" class="text-center py-12 text-[color:var(--muted)]">
+          <p class="text-4xl mb-3">📦</p>
+          <p>لا توجد منتجات في هذا التصنيف</p>
+        </div>
+
+        <!-- Floating Cart -->
+        <div
+          class="fixed bottom-24 left-4 right-4 sm:left-auto sm:right-6 sm:w-96 z-50 transition-all duration-500"
+          x-show="cart.length > 0"
+          x-transition:enter="transition ease-out duration-300"
+          x-transition:enter-start="opacity-0 translate-y-8"
+          x-transition:enter-end="opacity-100 translate-y-0"
+          x-transition:leave="transition ease-in duration-200"
+          x-transition:leave-start="opacity-100 translate-y-0"
+          x-transition:leave-end="opacity-0 translate-y-8"
+          x-cloak
+        >
+          <div class="noise rounded-3xl border border-[color:var(--border)] bg-[color:var(--bg)]/95 backdrop-blur-md shadow-glass p-4">
+            <!-- Cart Header -->
+            <div class="flex items-center justify-between mb-3">
+              <div class="flex items-center gap-2">
+                <span class="grid h-8 w-8 place-items-center rounded-xl bg-gradient-to-l from-fikra-violet to-fikra-orange text-white text-sm font-bold" x-text="cart.length"></span>
+                <span class="font-bold">سلة المشتريات</span>
+              </div>
+              <button @click="clearCart()" class="text-xs text-[color:var(--muted)] hover:text-red-400 transition">إفراغ السلة</button>
+            </div>
+
+            <!-- Cart Items -->
+            <div class="flex flex-wrap gap-1 mb-3 max-h-24 overflow-y-auto">
+              <template x-for="item in cart" :key="item.id">
+                <span class="inline-flex items-center gap-1 px-2 py-1 text-xs rounded-lg bg-white/10 ring-1 ring-white/5">
+                  <span x-text="item.emoji"></span>
+                  <span x-text="item.name" class="max-w-[100px] truncate"></span>
+                  <button @click="removeFromCart(item.id)" class="text-red-400 hover:text-red-300 mr-1">×</button>
+                </span>
+              </template>
+            </div>
+
+            <!-- Cart Total & Checkout -->
+            <div class="flex items-center justify-between pt-3 border-t border-[color:var(--border)]">
+              <div>
+                <span class="text-[color:var(--muted)] text-sm">الإجمالي:</span>
+                <span class="text-xl font-black mr-1" x-text="cartTotal"></span>
+                <span class="text-sm text-[color:var(--muted)]">ر.س</span>
+              </div>
+              <button
+                @click="checkout()"
+                class="inline-flex items-center gap-2 px-5 py-2 text-sm font-bold rounded-2xl bg-gradient-to-l from-fikra-orange to-fikra-violet text-white shadow-glow-violet hover:scale-105 transition-transform"
+              >
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none">
+                  <path d="M12 3a8.5 8.5 0 0 0-7.4 12.6L4 21l5.6-1.5A8.5 8.5 0 1 0 12 3Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+                </svg>
+                إتمام عبر واتساب
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
 
